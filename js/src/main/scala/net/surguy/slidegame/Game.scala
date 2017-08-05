@@ -2,6 +2,7 @@ package net.surguy.slidegame
 
 import net.surguy.slidegame.shared._
 import org.scalajs.dom
+import org.scalajs.dom.KeyboardEvent
 import org.scalajs.dom.html.Canvas
 import org.scalajs.dom.raw.{HTMLDivElement, Node}
 
@@ -36,9 +37,10 @@ class Board(var boardState: BoardState, rootDiv: HTMLDivElement) {
     val svgBoard = div (padding := "20px", svg(
       List(svgAttrs.attr("version"):="1.1", width := "550px", height := "550px", x := "0", y := "0", viewBox := viewBoxSize, renderBoard())
         ::: boardState.pieces.map(renderPiece)
-        :_* ), renderInstructions(), renderResetLink() )
+        :_* ), if(boardState.isGameOver) renderGameOver() else renderInstructions(), renderResetLink() )
 
     while (rootDiv.hasChildNodes()) { rootDiv.removeChild(rootDiv.firstChild) }
+    rootDiv.ownerDocument.onkeyup = { (evt: KeyboardEvent) => handleKeyPress(if (evt.keyCode!=0) evt.keyCode else evt.charCode) }
     rootDiv.appendChild(svgBoard.render )
   }
 
@@ -50,17 +52,38 @@ class Board(var boardState: BoardState, rootDiv: HTMLDivElement) {
     this.boardState = newState
     display()
   }
+  def moveActive(direction: Direction): Node = {
+    boardState.moveActivePiece( direction ) match {
+      case Some(newState) => this.boardState = newState
+      case None => // Invalid move - do nothing
+    }
+    display()
+  }
+  def handleKeyPress(key: Int): Unit = {
+    val keyName = key.toChar.toLower.toString
+    val selectedPiece = boardState.pieces.find(_.name == keyName)
+    (key, selectedPiece) match {
+      case (_, Some(piece))  => setActive(piece)
+      case (37,_) => moveActive(Left)
+      case (38,_) => moveActive(Up)
+      case (39,_) => moveActive(Right)
+      case (40,_) => moveActive(Down)
+      case _ => // Do nothing
+    }
+  }
 
   private def renderBoard() = rect(width := boardWidth, height := boardHeight, fill := "black")
 
   private def renderInstructions() = p ( "Playing " + boardState.name + ". Get the red block to the exit at the bottom. " +
     " Choose block by letter or with mouse, move with arrow keys.")
 
-  private def renderResetLink() = p ( GameSetup.initialStates.map(s => span( onclick := { () => reset(s) }, "Start again (%s)".format(s.name))) :_* )
+  private def renderResetLink() = p ( GameSetup.initialStates.map(s => span( onclick := { () => reset(s) }, "Start again (%s) | ".format(s.name))) :_* )
+
+  private def renderGameOver() = h1 ( style:= "color: red", "You completed it!" )
 
   private def renderPiece(piece: Piece) = {
     val isActive = piece.name == boardState.activeName
-    val flash = animate (attributeType:= "XML",  attributeName:= "fill-opacity", from:= "1.0", to:= "0.5", dur:= "3s", repeatCount:= "indefinite")
+    val flash = animate (attributeType:= "XML",  attributeName:= "fill-opacity", from:= "1.0", to:= "0.5", dur:= "1s", repeatCount:= "indefinite")
 
     val flashNode = if (isActive && !boardState.isGameOver) flash else text()
     val xPos = 100 * piece.position.c

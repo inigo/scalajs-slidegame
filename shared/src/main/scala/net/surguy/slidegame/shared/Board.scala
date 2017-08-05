@@ -4,6 +4,12 @@ case class Piece(name: String, shape: Shape, position: Position)
 case class Shape(width: Int, height: Int, color: String)
 case class Position(r: Int, c: Int)
 
+sealed trait Direction
+case object Up extends Direction
+case object Down extends Direction
+case object Left extends Direction
+case object Right extends Direction
+
 object Shapes {
   val big = Shape(width = 2, height = 2, color = "crimson")
   val small = Shape(width = 1, height = 1, color = "green")
@@ -29,7 +35,7 @@ object GameSetup {
     Piece("k", small, Position(4, 3))
   ))
 
-  val classic = BoardState("Classic Klotski", 5, 4, "a", "a", Position(3, 1), List(
+  val classic = BoardState(name = "Classic Klotski", numRows = 5, numCols = 4, activeName = "a", kingName = "a", winningPos = Position(3, 1), pieces = List(
     Piece("a", big, Position(0, 1)),
     Piece("b", tall, Position(0, 0)),
     Piece("c", tall, Position(0, 3)),
@@ -57,14 +63,25 @@ case class BoardState(name: String, numRows: Int, numCols: Int, activeName: Stri
   val isGameOver: Boolean = king.position==winningPos
 
   def setActive(newActiveName: String): BoardState = this.copy(activeName = newActiveName)
-  def moveActivePiece(newPosition: Position): BoardState = updatePiece(activePiece.copy(position = newPosition))
+  def moveActivePiece(direction: Direction): Option[BoardState] = {
+    val pos = activePiece.position
+    val newPosition = direction match {
+      case Up    => pos.copy( r = pos.r - 1 )
+      case Down  => pos.copy( r = pos.r + 1 )
+      case Left  => pos.copy( c = pos.c - 1 )
+      case Right => pos.copy( c = pos.c + 1 )
+    }
+    if (isGameOver) None else Some(moveActivePiece(newPosition)).filter(_.isValid)
+  }
+
+  private[shared] def moveActivePiece(newPosition: Position): BoardState = updatePiece(activePiece.copy(position = newPosition))
   private def updatePiece(movedPiece: Piece): BoardState = {
     val newPieces = movedPiece :: pieces.filterNot(_.name == movedPiece.name)
     this.copy(pieces = newPieces)
   }
 
-  def isValid: Boolean = noneOutsideBoard && noOverlaps
-  private[shared] val noneOutsideBoard: Boolean = pieces.flatMap(coverage).forall(p => p.c>=0 && p.c<=numCols && p.r>=0 && p.r<=numRows)
+  private[shared] def isValid: Boolean = noneOutsideBoard && noOverlaps
+  private[shared] val noneOutsideBoard: Boolean = pieces.flatMap(coverage).forall(p => p.c>=0 && p.c<numRows && p.r>=0 && p.r<numCols)
   private[shared] val noOverlaps: Boolean = {
     val allCoveredPositions = pieces.flatMap(coverage)
     allCoveredPositions.distinct.length == allCoveredPositions.length
