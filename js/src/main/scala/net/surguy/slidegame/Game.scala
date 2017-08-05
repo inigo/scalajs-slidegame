@@ -17,6 +17,6 @@ object Game {
   private[slidegame] def startGame(initialBoard: BoardState) = {
     println("Starting game")
     val slide = dom.document.getElementById("slidegame").asInstanceOf[HTMLDivElement]
-    new Actions(initialBoard, slide)
+    new Actions(initialBoard, (state: BoardState, actions: Actions) => new SvgBoardDisplay(state, slide, actions).display())
   }
 }

@@ -1,28 +1,27 @@
 package net.surguy.slidegame
 
 import net.surguy.slidegame.shared.{BoardState, Direction, Piece}
-import org.scalajs.dom.raw.{HTMLDivElement, Node}
 
 /**
   * Actions that change the state of the game.
   */
-class Actions(var boardState: BoardState, rootDiv: HTMLDivElement) {
+class Actions(private var boardState: BoardState, displayFn: (BoardState, Actions) => Unit) {
 
-  new SvgBoardDisplay(boardState, rootDiv, this).display()
+  displayFn(boardState, this)
 
-  def setActive(piece: Piece): Node = updateState(boardState.setActive(piece.name))
+  def setActive(piece: Piece): Unit = updateState(boardState.setActive(piece.name))
 
-  def moveActive(direction: Direction): Any = {
+  def moveActive(direction: Direction): Unit = {
     boardState.moveActivePiece(direction) match {
       case Some(newState) => updateState(newState)
       case None => // Invalid move - do nothing
     }
   }
 
-  def restart(newState: BoardState): Node = updateState(newState)
+  def restart(newState: BoardState): Unit = updateState(newState)
 
   private def updateState(newState: BoardState) = {
     this.boardState = newState
-    new SvgBoardDisplay(newState, rootDiv, this).display()
+    displayFn(boardState, this)
   }
 }
