@@ -66,7 +66,7 @@ class SvgBoardDisplay(boardState: BoardState, rootDiv: HTMLDivElement, actions: 
 
     g(onclick := { () => actions.setActive(piece) },
       rect(x := xPos, y := yPos, width := w, height := h, stroke := "black", strokeWidth := 5, fill := piece.shape.color, fillOpacity := opacity, flashNode),
-      text(x := xMid, y:= yMid+10, fontSize := 50, textAnchor := "middle", fill := "white",  piece.name)
+      text(x := xMid, y:= yMid+10, fontSize := 50, textAnchor := "middle", fill := (if (isActive) "black" else "white"),  piece.name)
     )
   }
 
