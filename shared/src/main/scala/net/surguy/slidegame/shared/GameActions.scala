@@ -1,6 +1,4 @@
-package net.surguy.slidegame
-
-import net.surguy.slidegame.shared._
+package net.surguy.slidegame.shared
 
 /**
   * Actions that change the state of the game.

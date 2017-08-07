@@ -1,6 +1,4 @@
-package net.surguy.slidegame
-
-import net.surguy.slidegame.shared.Message
+package net.surguy.slidegame.shared
 
 class Observable() {
   type Observer = PartialFunction[Message, Unit]

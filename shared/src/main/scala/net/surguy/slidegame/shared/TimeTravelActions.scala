@@ -1,7 +1,6 @@
-package net.surguy.slidegame
+package net.surguy.slidegame.shared
 
 import scala.collection.mutable.ListBuffer
-import net.surguy.slidegame.shared._
 
 /**
   * Support stepping forwards and backwards through the history.
@@ -38,7 +37,6 @@ class TimeTravelActions(observable: Observable) {
   }
 
   private def invert(msg: Message): Message = {
-    import net.surguy.slidegame.shared._
     msg match {
       case MoveActive(Left) => MoveActive(Right)
       case MoveActive(Right) => MoveActive(Left)
