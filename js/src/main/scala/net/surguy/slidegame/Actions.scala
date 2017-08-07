@@ -7,6 +7,7 @@ class Observable() {
 
   private var observers: List[Observer] = List()
   def registerObserver[T <: Message](observer: Observer): Unit = { observers = observer :: observers }
+  def unregisterObserver[T <: Message](observer: Observer): Unit = { observers = observers.diff(List(observer)) }
   def notifyObservers[T <: Message](message: T): Unit = {
     observers.filter(_.isDefinedAt(message)).foreach(o => o(message))
   }
@@ -15,17 +16,17 @@ class Observable() {
 sealed trait Message
 case class Reset(stateName: String) extends Message
 case class MoveActive(direction: Direction) extends Message
-case class SetActive(piece: Piece) extends Message
+case class SetActive(previousPiece: Piece, newPiece: Piece) extends Message
 case class UpdateBoard(newBoard: BoardState) extends Message
-case class TimeTravel(isBackward: Boolean)
+case class TimeTravel(isBackward: Boolean) extends Message
 
 /**
   * Actions that change the state of the game.
   */
 class GameActions(private var boardState: BoardState, observable: Observable, displayFn: (BoardState, Observable) => Unit) {
   val observers: Seq[PartialFunction[Message, Unit]] = List(
-    { case SetActive(piece) =>
-      val newState = boardState.setActive(piece.name)
+    { case SetActive(previousPiece, newPiece) =>
+      val newState = boardState.setActive(newPiece.name)
       observable.notifyObservers(UpdateBoard(newState))
     },
     { case MoveActive(direction) =>

@@ -17,6 +17,8 @@ object Game {
   private[slidegame] def startGame(initialBoard: BoardState) = {
     println("Starting game")
     val slide = dom.document.getElementById("slidegame").asInstanceOf[HTMLDivElement]
-    new GameActions(initialBoard, new Observable(), (state: BoardState, actions: Observable) => new SvgBoardDisplay(state, slide, actions).display())
+    val observable = new Observable()
+    new TimeTravelActions(observable)
+    new GameActions(initialBoard, observable, (state: BoardState, actions: Observable) => new SvgBoardDisplay(state, slide, actions).display())
   }
 }

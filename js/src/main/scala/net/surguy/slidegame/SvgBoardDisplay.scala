@@ -22,7 +22,9 @@ class SvgBoardDisplay(boardState: BoardState, rootDiv: HTMLDivElement, actions: 
     val svgBoard = div (padding := "20px", svg(
       List(svgAttrs.attr("version"):="1.1", width := "550px", height := "550px", x := "0", y := "0", viewBox := viewBoxSize, renderBoard())
         ::: boardState.pieces.map(renderPiece)
-        :_* ), if(boardState.isGameOver) renderGameOver() else renderInstructions(), renderResetLink() )
+        :_* ),
+      renderTimeTravel(),
+      if(boardState.isGameOver) renderGameOver() else renderInstructions(), renderResetLink() )
 
     while (rootDiv.hasChildNodes()) { rootDiv.removeChild(rootDiv.firstChild) }
     rootDiv.ownerDocument.onkeyup = { (evt: KeyboardEvent) => handleKeyPress(if (evt.keyCode!=0) evt.keyCode else evt.charCode) }
@@ -33,7 +35,7 @@ class SvgBoardDisplay(boardState: BoardState, rootDiv: HTMLDivElement, actions: 
     val keyName = key.toChar.toLower.toString
     val selectedPiece = boardState.pieces.find(_.name == keyName)
     (key, selectedPiece) match {
-      case (_, Some(piece))  => actions.notifyObservers(SetActive(piece))
+      case (_, Some(piece))  => actions.notifyObservers(SetActive(boardState.activePiece, piece))
       case (37,_) => actions.notifyObservers(MoveActive(Left))
       case (38,_) => actions.notifyObservers(MoveActive(Up))
       case (39,_) => actions.notifyObservers(MoveActive(Right))
@@ -41,6 +43,9 @@ class SvgBoardDisplay(boardState: BoardState, rootDiv: HTMLDivElement, actions: 
       case _ => // Do nothing
     }
   }
+
+  private def renderTimeTravel() = p( span(onclick:= { () => actions.notifyObservers(TimeTravel(true)) }, style:="padding-right: 20px", "<<"), span(" "),
+                                      span(onclick:= { () => actions.notifyObservers(TimeTravel(false)) }, ">>"))
 
   private def renderBoard() = rect(width := boardWidth, height := boardHeight, fill := "black")
 
@@ -64,7 +69,7 @@ class SvgBoardDisplay(boardState: BoardState, rootDiv: HTMLDivElement, actions: 
     val yMid = yPos + (h/2)
     val opacity = if (boardState.isGameOver) 0.5 else 1.0
 
-    g(onclick := { () => actions.notifyObservers(SetActive(piece)) },
+    g(onclick := { () => actions.notifyObservers(SetActive(boardState.activePiece, piece)) },
       rect(x := xPos, y := yPos, width := w, height := h, stroke := "black", strokeWidth := 5, fill := piece.shape.color, fillOpacity := opacity, flashNode),
       text(x := xMid, y:= yMid+10, fontSize := 50, textAnchor := "middle", fill := (if (isActive) "black" else "white"),  piece.name)
     )
