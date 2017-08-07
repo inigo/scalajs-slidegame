@@ -10,7 +10,7 @@ import scalatags.JsDom.all._
 /**
   * Render the current board in SVG.
   */
-class SvgBoardDisplay(boardState: BoardState, rootDiv: HTMLDivElement, actions: Actions) {
+class SvgBoardDisplay(boardState: BoardState, rootDiv: HTMLDivElement, actions: Observable) {
   import scalatags.JsDom.svgAttrs._
   import scalatags.JsDom.svgTags._
 
@@ -33,11 +33,11 @@ class SvgBoardDisplay(boardState: BoardState, rootDiv: HTMLDivElement, actions: 
     val keyName = key.toChar.toLower.toString
     val selectedPiece = boardState.pieces.find(_.name == keyName)
     (key, selectedPiece) match {
-      case (_, Some(piece))  => actions.setActive(piece)
-      case (37,_) => actions.moveActive(Left)
-      case (38,_) => actions.moveActive(Up)
-      case (39,_) => actions.moveActive(Right)
-      case (40,_) => actions.moveActive(Down)
+      case (_, Some(piece))  => actions.notifyObservers(SetActive(piece))
+      case (37,_) => actions.notifyObservers(MoveActive(Left))
+      case (38,_) => actions.notifyObservers(MoveActive(Up))
+      case (39,_) => actions.notifyObservers(MoveActive(Right))
+      case (40,_) => actions.notifyObservers(MoveActive(Down))
       case _ => // Do nothing
     }
   }
@@ -47,7 +47,7 @@ class SvgBoardDisplay(boardState: BoardState, rootDiv: HTMLDivElement, actions: 
   private def renderInstructions() = p ( "Playing " + boardState.name + ". Get the red block to the exit at the bottom. " +
     " Choose block by letter or with mouse, move with arrow keys.")
 
-  private def renderResetLink() = p ( GameSetup.initialStates.map(s => span( onclick := { () => actions.restart(s) }, "Start again (%s) | ".format(s.name))) :_* )
+  private def renderResetLink() = p ( GameSetup.initialStates.map(s => span( onclick := { () => actions.notifyObservers(Reset(s.name)) }, "Start again (%s) | ".format(s.name))) :_* )
 
   private def renderGameOver() = h1 ( style:= "color: red", "You completed it!" )
 
@@ -64,7 +64,7 @@ class SvgBoardDisplay(boardState: BoardState, rootDiv: HTMLDivElement, actions: 
     val yMid = yPos + (h/2)
     val opacity = if (boardState.isGameOver) 0.5 else 1.0
 
-    g(onclick := { () => actions.setActive(piece) },
+    g(onclick := { () => actions.notifyObservers(SetActive(piece)) },
       rect(x := xPos, y := yPos, width := w, height := h, stroke := "black", strokeWidth := 5, fill := piece.shape.color, fillOpacity := opacity, flashNode),
       text(x := xMid, y:= yMid+10, fontSize := 50, textAnchor := "middle", fill := (if (isActive) "black" else "white"),  piece.name)
     )
