@@ -1,6 +1,6 @@
 package net.surguy.slidegame
 
-import net.surguy.slidegame.shared.{BoardState, Down, GameSetup, Left, Piece, Right, Up}
+import net.surguy.slidegame.shared._
 import org.scalajs.dom.KeyboardEvent
 import org.scalajs.dom.raw.{HTMLDivElement, Node}
 

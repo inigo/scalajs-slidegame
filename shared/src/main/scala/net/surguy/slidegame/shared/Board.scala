@@ -1,5 +1,12 @@
 package net.surguy.slidegame.shared
 
+sealed trait Message
+case class Reset(stateName: String) extends Message
+case class MoveActive(direction: Direction) extends Message
+case class SetActive(previousPiece: Piece, newPiece: Piece) extends Message
+case class UpdateBoard(newBoard: BoardState) extends Message
+case class TimeTravel(isBackward: Boolean) extends Message
+
 case class Piece(name: String, shape: Shape, position: Position)
 case class Shape(width: Int, height: Int, color: String)
 case class Position(r: Int, c: Int)

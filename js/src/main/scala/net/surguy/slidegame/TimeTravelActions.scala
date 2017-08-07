@@ -1,6 +1,7 @@
 package net.surguy.slidegame
 
 import scala.collection.mutable.ListBuffer
+import net.surguy.slidegame.shared._
 
 /**
   * Support stepping forwards and backwards through the history.

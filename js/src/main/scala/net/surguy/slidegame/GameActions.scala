@@ -1,24 +1,6 @@
 package net.surguy.slidegame
 
-import net.surguy.slidegame.shared.{BoardState, Direction, GameSetup, Piece}
-
-class Observable() {
-  type Observer = PartialFunction[Message, Unit]
-
-  private var observers: List[Observer] = List()
-  def registerObserver[T <: Message](observer: Observer): Unit = { observers = observer :: observers }
-  def unregisterObserver[T <: Message](observer: Observer): Unit = { observers = observers.diff(List(observer)) }
-  def notifyObservers[T <: Message](message: T): Unit = {
-    observers.filter(_.isDefinedAt(message)).foreach(o => o(message))
-  }
-}
-
-sealed trait Message
-case class Reset(stateName: String) extends Message
-case class MoveActive(direction: Direction) extends Message
-case class SetActive(previousPiece: Piece, newPiece: Piece) extends Message
-case class UpdateBoard(newBoard: BoardState) extends Message
-case class TimeTravel(isBackward: Boolean) extends Message
+import net.surguy.slidegame.shared._
 
 /**
   * Actions that change the state of the game.
