@@ -35,7 +35,7 @@ The S3 bucket is set up with a public read policy:
             "Effect":"Allow",
           "Principal": "*",
           "Action":["s3:GetObject"],
-          "Resource":["arn:aws:s3:::scalajs-minesweeper/*"
+          "Resource":["arn:aws:s3:::scalajs-slidegame/*"
           ]
         }
       ]
