@@ -25,6 +25,8 @@ lazy val slidegame = crossProject.in(file(".")).
       , "com.lihaoyi" %%% "scalatags" % "0.6.5"
       , "com.lihaoyi" %%% "utest" % "0.4.4" % "test"
     ),
+    relativeSourceMaps := true,
+    emitSourceMaps := true,
     testFrameworks += new TestFramework("utest.runner.Framework"),
     jsDependencies += RuntimeDOM
   )
